@@ -464,6 +464,9 @@ CL_API_ENTRY cl_int CL_API_CALL clMemFreeINTEL(cl_context context, void *ptr) {
     UNLOCK_RETURN(CL_INVALID_CONTEXT);
   }
 
+  // TODO: increase bank's priority of the corresponding
+  // device mem if its a device usm pointer.
+
   // NULL is valid input where nothing happens
   if (ptr == NULL) {
     UNLOCK_RETURN(CL_SUCCESS);
@@ -522,6 +525,9 @@ ACL_EXPORT
 CL_API_ENTRY cl_int CL_API_CALL clMemBlockingFreeINTEL(cl_context context,
                                                        void *ptr) {
   acl_lock();
+
+  // TODO: increase bank's priority of the corresponding
+  // device mem if its a device usm pointer.
 
   if (!acl_context_is_valid(context)) {
     UNLOCK_RETURN(CL_INVALID_CONTEXT);

@@ -157,6 +157,9 @@ ACL_EXPORT
 CL_API_ENTRY cl_int CL_API_CALL clReleaseMemObjectIntelFPGA(cl_mem mem) {
   acl_lock();
 
+  // TODO: Increase the priority of the corresponding bank accordingly
+  // since the bank has more space now after the mem is released.
+
   // In the double-free case, we'll error out here, for two reasons:
   // 1) the reference count will be 0.
   // 1) mem->region == 0
@@ -422,6 +425,8 @@ CL_API_ENTRY cl_mem clCreateBufferWithPropertiesINTEL(
 #ifdef MEM_DEBUG_MSG
   printf("CreateBuffer\n");
 #endif
+  // if no bank is specified here, then set this buffer object to status of
+  // "need to decide bank id"
 
   while (properties != NULL && *properties != 0) {
     switch (*properties) {
@@ -755,6 +760,8 @@ CL_API_ENTRY cl_mem clCreateBufferWithPropertiesINTEL(
     int device_id = context->device[0]->id;
     unsigned int physical_id =
         acl_platform.device[device_id].def.physical_device_id;
+    // TODO: assign the buffer a bank id here, since the user want the memory
+    // now (i.e allocation not deferred)
     if (mem->reserved_allocations[physical_id].size() == 0) {
       acl_resize_reserved_allocations_for_device(
           mem, acl_platform.device[device_id].def);
@@ -3481,6 +3488,9 @@ CL_API_ENTRY cl_int CL_API_CALL clEnqueueWriteBufferIntelFPGA(
   size_t tmp_cb[3];
   acl_lock();
 
+  // TODO: if the buffer's status is "need to decide bank id", then
+  // assign it a bank id according to the priority queue
+
   tmp_src_offset[0] = (size_t)((char *)ptr - (const char *)ACL_MEM_ALIGN);
   tmp_src_offset[1] = 0;
   tmp_src_offset[2] = 0;
@@ -4256,6 +4266,9 @@ static void l_get_working_range(const acl_block_allocation_t *block_allocation,
                                 acl_addr_range_t *working_range,
                                 void **initial_try) {
   acl_assert_locked();
+  // TODO: this function actually allocate the memory
+  // update the priority queue defined in acltypes.h
+  // according to physical_device_id, target_mem_id, bank_id
 
   if (block_allocation->region == &(acl_platform.global_mem)) {
     int env_override = 0;

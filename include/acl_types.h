@@ -1665,6 +1665,13 @@ typedef struct _cl_platform_id
   // A set of contexts within this platform
   std::set<cl_context> contexts_set;
 
+  // The number of device allocation made for each bank id
+  // It is used to load balance between banks
+  // TODO: add a mapping here from the device to global memory id to a priority
+  // queue each entry in queue is a pair of bank and the number of allocated mem
+  // in the bank std::set is a good choice here as red-black tree's most bottom
+  // left node is the smallest / least mem allocated.
+
 } _cl_platform_id;
 
 // returns pointer to single global cl_platform_id instance in cl_platform.c
